@@ -1,0 +1,16 @@
+{
+  "name": "pulseflow",
+  "version": "1.0.0",
+  "description": "Camera-based interactive breathing visualisation using SmartSpectra",
+  "repository": {
+    "type": "git",
+    "url": "git@ssh.bitbucket.org:sriram-projects/pulseflow.git"
+  },
+  "license": "ISC",
+  "author": "sriram",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
