@@ -35,16 +35,36 @@ sdk.on('processingStatus', (status) => {
 });
 
 // 7. Validation status listener
+let previousValidationCode = null;
+let previousValidationHint = null;
 sdk.on('validationStatus', (code, ts, hint) => {
-  console.log('Validation:', code, hint, 'at', ts, 'µs');
-});
+  if (
+    code !== previousValidationCode ||
+    hint !== previousValidationHint
+  ) {
+    console.log('Validation:', code, hint);
 
+    previousValidationCode = code;
+    previousValidationHint = hint;
+  }
+});
+let lastMeasurementTime = 0;
 // 8. Metrics listener
 sdk.on('metrics', (buf, ts) => {
-  console.log('Metrics received at', ts, 'µs');
-  const metrics =  decodeMetrics(buf);
-  if (metrics.breathing.rate.length > 0){
-  console.log('Breathing measurement:', metrics.breathing.rate[0].value);
+  const metrics = decodeMetrics(buf);
+
+  const rate = metrics?.breathing?.rate?.[0]?.value;
+
+  if (typeof rate !== 'number' || !Number.isFinite(rate)) {
+    return;
+  }
+
+  const now = Date.now();
+
+  if (now - lastMeasurementTime >= 1000) {
+    console.log('Breathing measurement:', rate.toFixed(2), 'breaths/min');
+
+    lastMeasurementTime = now;
   }
 });
 
@@ -54,6 +74,7 @@ let shuttingDown = false;
 
 process.on('SIGINT', async () => {
   if (shuttingDown) return;
+
   shuttingDown = true;
 
   try {
@@ -68,7 +89,6 @@ process.on('SIGINT', async () => {
       console.error('Error destroying SDK:', error.message);
       process.exitCode = 1;
     }
-    process.exit(process.exitCode ?? 0);
   }
 });
 
