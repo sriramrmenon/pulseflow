@@ -163,3 +163,242 @@ The final submission is expected to include:
 ## Licence
 
 The project licence has not yet been finalised. The application licence and the SmartSpectra SDK's licensing requirements will be reviewed before public release.
+
+# Camera Integration and Testing (macOS)
+
+## Overview
+
+PulseFlow uses the Presage SmartSpectra Node.js SDK to measure breathing rate through a webcam without requiring physical sensors.
+
+Camera integration has been tested on macOS using the built-in FaceTime HD Camera.
+
+## 1. System Requirements
+
+- macOS with a supported webcam
+- Node.js v24.22.2 (tested version)
+- npm
+- SmartSpectra Node.js SDK (`@smartspectra/node-sdk`)
+- Valid Presage Physiology API key
+- Camera permissions enabled for the terminal application
+
+## 2. Installation and Setup
+
+Clone the PulseFlow repository and navigate to the project directory.
+
+Install the dependencies:
+
+```bash
+npm install
+```
+
+Configure the SmartSpectra API key as an environment variable:
+
+```bash
+export SMARTSPECTRA_API_KEY="YOUR_API_KEY"
+```
+
+Never commit API keys or credentials to the repository.
+
+Verify that the environment variable is configured:
+
+```bash
+node -e "console.log(Boolean(process.env.SMARTSPECTRA_API_KEY))"
+```
+
+Expected output:
+
+```text
+true
+```
+
+This confirms that the variable contains a value, but does not validate the key with Presage.
+
+## 3. Running PulseFlow
+
+Start the application:
+
+```bash
+node cameratest.js
+```
+
+The application discovers available cameras and displays a numbered list.
+
+Example output from testing:
+
+```text
+Available cameras:
+1. FaceTime HD Camera
+
+Enter camera number: 1
+Selected camera: FaceTime HD Camera
+
+Allow PulseFlow to use "FaceTime HD Camera" for breathing measurement? (yes/no): yes
+```
+
+Camera access is requested explicitly before a measurement session begins.
+
+After consent, the application displays:
+
+```text
+PulseFlow Measurement Menu
+1. Start measurement
+2. Stop measurement
+3. Exit
+```
+
+Selecting option 1 starts SmartSpectra measurement. Option 2 stops the session and attempts SDK cleanup. Option 3 exits the application.
+
+Ctrl+C also initiates the shutdown procedure.
+
+## 4. Camera Positioning and Measurement Quality
+
+SmartSpectra uses camera images to estimate physiological signals. Suitable framing, positioning and lighting are important for obtaining stable measurements.
+
+Recommended conditions:
+
+- Face the camera directly.
+- Keep your face clearly visible.
+- Position the camera so that sufficient upper chest area is visible.
+- Use consistent, adequate lighting.
+- Avoid excessive movement during measurement.
+- Allow time for the breathing signal to stabilise.
+
+During testing, the SDK returned the following validation messages:
+
+| Validation code | Message |
+|---|---|
+| 0 | Hold still and record |
+| 1 | No face found |
+| 7 | Place more of the chest in view |
+
+PulseFlow displays validation messages so users can adjust their positioning when necessary.
+
+## 5. Breathing Measurements
+
+The application retrieves breathing measurements through the SmartSpectra metrics event.
+
+Each breathing measurement includes:
+
+- **value:** Breathing rate in breaths per minute.
+- **stable:** Whether the SDK marks the measurement as stable.
+- **confidence:** SDK-provided confidence value.
+
+Example output from live testing:
+
+```text
+Breathing measurement: 14.41 breaths/min | Stable: true | Confidence: 51.42
+Breathing measurement: 17.03 breaths/min | Stable: true | Confidence: 56.58
+Breathing measurement: 23.80 breaths/min | Stable: true | Confidence: 60.27
+```
+
+PulseFlow displays breathing measurements only when the value is finite, the current validation status is `kOk`, and the SDK reports `stable: true`.
+
+When the measurement is unavailable or unstable, the application displays messages such as:
+
+```text
+Waiting for a valid breathing signal...
+No breathing signal available. Waiting...
+Breathing signal is not stable yet.
+```
+
+Quality messages are limited to approximately one every five seconds to reduce repetitive console output.
+
+A stable signal is an SDK quality indication, not a guarantee of clinical accuracy.
+
+## 6. Observed SDK Warnings and Errors
+
+The following warnings were observed during testing on macOS.
+
+### AVFoundation Camera Warnings
+
+```text
+AVFoundation: device does not support continuous auto-exposure
+AVFoundation: device does not support continuous auto white balance
+AVFoundation: device does not support continuous auto-focus
+```
+
+Additional warnings indicated that the camera did not support locking exposure, white balance or focus.
+
+These warnings describe unsupported camera capabilities.
+
+They did not prevent the application from receiving breathing measurements during the successful tests.
+
+### Inference Feedback Warning
+
+```text
+Feedback manager requires a model with a single signature inference.
+Disabling support for feedback tensors.
+```
+
+This warning originated from the underlying inference components. Measurements were still produced during testing.
+
+### Landmark Projection Warning
+
+```text
+Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI.
+```
+
+This warning was observed during processing. Its effect was not independently investigated, but it did not prevent successful breathing measurements in the recorded tests.
+
+### SDK State Error
+
+```text
+SmartSpectra is not in a valid state for this operation.
+```
+
+This error was occasionally observed during measurement shutdown.
+
+In the affected tests, the Stop operation subsequently completed. Later Stop tests completed without this error.
+
+### API Authentication Error
+
+An HTTP 401 authentication error was initially encountered:
+
+```text
+Metrics authorization failed.
+Status: 401
+Invalid or missing API key
+```
+
+The SDK rejected the supplied credentials.
+
+Subsequent tests completed successfully and produced live breathing measurements without the authentication error recurring.
+
+## 7. Functional Testing Results
+
+Testing was performed on macOS using the built-in FaceTime HD Camera.
+
+| Test case | Result |
+|---|---|
+| Detect available camera | Passed |
+| Select camera | Passed |
+| Request explicit camera consent | Passed |
+| Start measurement | Passed |
+| Receive live breathing readings | Passed |
+| Receive validation status and hints | Passed |
+| Identify stable measurements | Passed |
+| Display confidence values | Passed |
+| Handle missing and unstable readings | Passed |
+| Stop measurement | Passed |
+| Restart measurement after Stop | Passed |
+| Start → Stop → Start → Stop → Exit | Passed |
+| Ctrl+C graceful shutdown | Passed |
+
+## 8. Known Limitations
+
+- Camera capability warnings may appear depending on the hardware.
+- Measurement quality depends on lighting, positioning and movement.
+- Unstable or missing measurements are not displayed as valid breathing readings.
+- A prolonged absence of metrics events is not currently detected using a dedicated timeout.
+- Native SDK resource release was assessed through successful Stop, restart and process exit behaviour, rather than independent resource inspection.
+- PulseFlow is a prototype and its breathing measurements should not be treated as medical diagnoses.
+
+## 9. Conclusion
+
+SmartSpectra camera integration has been successfully verified on macOS.
+
+PulseFlow can detect and select a camera, obtain user consent, start breathing measurements, display validation guidance, report stable breathing values and stop or restart measurement sessions.
+
+The application also supports shutdown through the menu and Ctrl+C.
+
+The macOS camera integration requirements for PUL-20 have been functionally verified.
