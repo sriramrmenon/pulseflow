@@ -402,3 +402,40 @@ PulseFlow can detect and select a camera, obtain user consent, start breathing m
 The application also supports shutdown through the menu and Ctrl+C.
 
 The macOS camera integration requirements for PUL-20 have been functionally verified.
+
+
+## Electron Application Architecture
+
+PulseFlow uses Electron to provide a desktop interface for camera-based breathing measurements.
+
+### Main Process (`main.js`)
+- Creates and manages the application window.
+- Handles application lifecycle events.
+- Configures Electron security settings.
+- Will eventually manage communication with the SmartSpectra SDK.
+
+### Renderer Process (`index.html`)
+- Displays the PulseFlow interface.
+- Will display live breathing measurements and validation messages.
+- Does not have direct access to Node.js APIs.
+
+### Preload Script (`preload.js`)
+- Provides a controlled communication bridge between the main and renderer processes.
+- Will use Electron's `contextBridge` and IPC APIs when SDK integration is implemented.
+- Currently contains no application logic.
+
+### Security Configuration
+
+The application uses the following Electron settings:
+
+- `nodeIntegration: false`
+- `contextIsolation: true`
+- A dedicated preload script
+
+These settings help isolate the renderer from privileged Node.js operations.
+
+### Current Implementation
+
+The Electron application successfully opens a desktop window on macOS.
+
+The existing SmartSpectra prototype (`cameratest.js`) remains separate and unchanged. Integration with the desktop interface will be implemented in subsequent development tasks.
