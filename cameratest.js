@@ -113,6 +113,7 @@ try {
 
   // 7. Select camera
   selectedCamera = cameras[cameraNumber - 1];
+
   console.log('Selected camera:', selectedCamera.name);
 
   // 8. Request user consent
@@ -172,41 +173,101 @@ try {
                 console.log('Processing status:', status);
               });
 
-              // 13. Validation status listener
+              // 13. Validation status listener (PUL-19)
               let previousValidationCode = null;
               let previousValidationHint = null;
+              let validationOK = false;
 
               sdk.on('validationStatus', (code, ts, hint) => {
+                validationOK = code === 0; // kOk
+
                 if (
                   code !== previousValidationCode ||
                   hint !== previousValidationHint
                 ) {
                   console.log('Validation:', code, hint);
+
+                  if (!validationOK) {
+                    console.log(
+                      'Waiting for a valid breathing signal...'
+                    );
+                  }
+
                   previousValidationCode = code;
                   previousValidationHint = hint;
                 }
               });
 
-              // 14. Breathing measurement listener
+              // 14. Breathing measurement listener (PUL-19)
               let lastMeasurementTime = 0;
+              let lastQualityMessageTime = 0;
+              let previousSignalState = null;
 
               sdk.on('metrics', (buf, ts) => {
-                const metrics = decodeMetrics(buf);
-                const rate = metrics?.breathing?.rate?.[0]?.value;
+                try {
+                  const metrics = decodeMetrics(buf);
 
-                if (!Number.isFinite(rate)) {
-                  return;
-                }
+                  const measurement =
+                    metrics?.breathing?.rate?.[0];
 
-                const now = Date.now();
+                  const rate = measurement?.value;
+                  const stable = measurement?.stable;
+                  const confidence = measurement?.confidence;
 
-                if (now - lastMeasurementTime >= 1000) {
-                  console.log(
-                    'Breathing measurement:',
-                    rate.toFixed(2),
-                    'breaths/min'
+                  const now = Date.now();
+
+                  // Determine the current signal state
+                  let signalState;
+
+                  if (!Number.isFinite(rate)) {
+                    signalState = 'missing';
+                  } else if (!validationOK || stable !== true) {
+                    signalState = 'unstable';
+                  } else {
+                    signalState = 'stable';
+                  }
+
+                  // Show quality warnings at most once every 5 seconds
+                  if (signalState !== 'stable') {
+                    if (now - lastQualityMessageTime >= 5000) {
+                      if (signalState === 'missing') {
+                        console.log(
+                          'No breathing signal available. Waiting...'
+                        );
+                      } else {
+                        console.log(
+                          'Breathing signal is not stable yet.'
+                        );
+                      }
+
+                      lastQualityMessageTime = now;
+                    }
+
+                    previousSignalState = signalState;
+                    return;
+                  }
+
+                  previousSignalState = 'stable';
+
+                  // Display stable breathing rate once per second
+                  if (now - lastMeasurementTime >= 1000) {
+                    console.log(
+                      'Breathing measurement:',
+                      rate.toFixed(2),
+                      'breaths/min',
+                      '| Stable:',
+                      stable,
+                      '| Confidence:',
+                      confidence?.toFixed(2) ?? 'N/A'
+                    );
+
+                    lastMeasurementTime = now;
+                  }
+                } catch (error) {
+                  console.error(
+                    'Unable to process breathing metrics:',
+                    error.message
                   );
-                  lastMeasurementTime = now;
                 }
               });
 
@@ -262,21 +323,21 @@ try {
 
       default:
         console.log('Invalid selection');
-    } // End of switch
-  } // End of while
-
+    }
+  }
 } catch (error) {
   if (error.message === 'Aborted with Ctrl+C') {
     if (!shuttingDown) {
       shuttingDown = true;
       running = false;
 
-      console.log('\nCtrl+C detected. Shutting down PulseFlow...');
+      console.log(
+        '\nCtrl+C detected. Shutting down PulseFlow...'
+      );
 
       await cleanupSDK();
     }
   } else if (!shuttingDown) {
-
     console.error('PulseFlow error:', error.message);
     process.exitCode = 1;
   }
