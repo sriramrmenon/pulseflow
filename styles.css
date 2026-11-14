@@ -1,0 +1,141 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #101827;
+    color: #ffffff;
+}
+
+.app {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #62d9bd;
+    margin: 0;
+}
+
+#session-status {
+    background: #293648;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.measurement {
+    background: #1a2638;
+    padding: 35px 20px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.measurement h2 {
+    color: #a8b8ca;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.rate {
+    margin: 25px 0;
+}
+
+#breathing-rate {
+    font-size: 64px;
+    font-weight: bold;
+}
+
+.unit {
+    color: #a8b8ca;
+}
+
+.breathing-circle {
+    width: 150px;
+    height: 150px;
+    border: 4px solid #62d9bd;
+    border-radius: 50%;
+    margin: 25px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #62d9bd;
+    font-size: 35px;
+    background: #203b46;
+}
+
+#measurement-message {
+    color: #a8b8ca;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.detail-card {
+    background: #1a2638;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.detail-card h3 {
+    font-size: 13px;
+    color: #a8b8ca;
+}
+
+.detail-card p {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#start-button {
+    background: #62d9bd;
+    color: #101827;
+}
+
+#stop-button {
+    background: #293648;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #8291a5;
+    font-size: 12px;
+}
