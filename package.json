@@ -10,11 +10,11 @@
   "author": "sriram",
   "type": "module",
   "main": "main.js",
-  "main": "main.js",
-"scripts": {
-  "start": "electron .",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:smoke": "playwright test"
+  },
   "dependencies": {
     "@smartspectra/node-sdk": "^3.5.0"
   },
@@ -23,6 +23,8 @@
     "protobufjs@7.6.6": true
   },
   "devDependencies": {
-    "electron": "^45.3.2"
+    "@playwright/test": "^1.65.1",
+    "electron": "^45.3.2",
+    "playwright": "^1.65.1"
   }
 }
