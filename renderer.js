@@ -126,7 +126,7 @@ if (measurementPanel) {
 
 let waveformFrame = null;
 
-// Added: breathing measurement acquisition indicator
+// Breathing measurement acquisition indicator
 const acquisitionIndicator = document.createElement('div');
 acquisitionIndicator.className = 'acquisition-indicator';
 acquisitionIndicator.setAttribute('role', 'status');
@@ -202,27 +202,107 @@ function hasLiveBreathingSignal() {
     );
 }
 
-// Animated waveform based on the breathing rate
+// Updated: waveform state
+let breathingPhase = 0;
+let previousFrameTime = null;
+let smoothedBreathingRate = null;
+
+const waveformSamples = [];
+const waveformSampleInterval = 50;
+const waveformMaxSamples = 181;
+
+let lastWaveformSampleTime = null;
+
+// Updated: rate-driven, continuously drawn breathing waveform
 function animateWaveform(timestamp) {
     if (!hasLiveBreathingSignal()) {
         waveformFrame = null;
+        previousFrameTime = null;
+        smoothedBreathingRate = null;
+        breathingPhase = 0;
+        lastWaveformSampleTime = null;
+        waveformSamples.length = 0;
+
         waveformPath.setAttribute('d', 'M 0 25 L 180 25');
         return;
     }
 
-    const rate = Number(element.textContent);
-    const phase = (timestamp / 1000) * 2 * Math.PI * (rate / 60);
+    const measuredRate = Number(element.textContent);
 
-    let path = '';
-
-    for (let x = 0; x <= 180; x += 3) {
-        const angle = (x / 180) * 4 * Math.PI - phase;
-        const y = 25 - Math.sin(angle) * 14;
-
-        path += `${x === 0 ? 'M' : 'L'} ${x} ${y} `;
+    if (smoothedBreathingRate === null) {
+        smoothedBreathingRate = measuredRate;
     }
 
+    const elapsed = previousFrameTime === null
+        ? 0
+        : Math.min((timestamp - previousFrameTime) / 1000, 0.1);
+
+    previousFrameTime = timestamp;
+
+    // Smooth changes between measured breathing rates
+    const smoothing = 1 - Math.exp(-elapsed * 2);
+
+    smoothedBreathingRate +=
+        (measuredRate - smoothedBreathingRate) * smoothing;
+
+    // Advance the breathing cycle using the measured rate
+    breathingPhase = (
+        breathingPhase +
+        elapsed * (smoothedBreathingRate / 60)
+    ) % 1;
+
+    // Breathing-inspired shape with slower exhalation
+    let amplitude;
+
+    if (breathingPhase < 0.35) {
+        // Smooth rise
+        const progress = breathingPhase / 0.35;
+
+        amplitude =
+            (1 - Math.cos(Math.PI * progress)) / 2;
+
+    } else if (breathingPhase < 0.85) {
+        // Gradual fall
+        const progress =
+            (breathingPhase - 0.35) / 0.5;
+
+        amplitude =
+            (1 + Math.cos(Math.PI * progress)) / 2;
+
+    } else {
+        // Short resting phase
+        amplitude = 0;
+    }
+
+    const y = 38 - amplitude * 26;
+
+    // Collect samples at a consistent interval
+    if (
+        lastWaveformSampleTime === null ||
+        timestamp - lastWaveformSampleTime >= waveformSampleInterval
+    ) {
+        waveformSamples.push(y);
+
+        if (waveformSamples.length > waveformMaxSamples) {
+            waveformSamples.shift();
+        }
+
+        lastWaveformSampleTime = timestamp;
+    }
+
+    // Draw the most recent samples from left to right
+    const lastIndex = waveformSamples.length - 1;
+
+    const path = waveformSamples.map((value, index) => {
+        const x = lastIndex > 0
+            ? (index / lastIndex) * Math.min(lastIndex, 180)
+            : 0;
+
+        return `${index === 0 ? 'M' : 'L'} ${x} ${value}`;
+    }).join(' ');
+
     waveformPath.setAttribute('d', path);
+
     waveformFrame = requestAnimationFrame(animateWaveform);
 }
 
@@ -240,6 +320,13 @@ function updateWaveform() {
             cancelAnimationFrame(waveformFrame);
             waveformFrame = null;
         }
+
+        // Reset the simulated trace when the signal is unavailable
+        waveformSamples.length = 0;
+        previousFrameTime = null;
+        smoothedBreathingRate = null;
+        breathingPhase = 0;
+        lastWaveformSampleTime = null;
 
         // Straight line when no fresh stable measurement exists
         waveformPath.setAttribute('d', 'M 0 25 L 180 25');
@@ -286,7 +373,6 @@ function updateBreathingRate(rate) {
         }
     }
 
-    // Added: complete initial acquisition on first valid reading
     completeAcquisitionIfValid();
 
     updateRipples();
@@ -375,7 +461,6 @@ async function startMeasurement() {
         cameraSelect.disabled = false;
         stopButton.disabled = true;
 
-        // Added: hide indicator on start error
         stopAcquisitionIndicator();
     }
 }
@@ -385,7 +470,6 @@ async function stopMeasurement() {
     stopButton.disabled = true;
     sessionStatus.textContent = 'Stopping...';
 
-    // Added: stop loading indicator immediately
     stopAcquisitionIndicator();
 
     try {
@@ -409,11 +493,10 @@ function updateSessionStatus(status) {
         previousGuidance = '';
     }
 
-    // Added: manage initial measurement acquisition
+    // Manage initial measurement acquisition
     if (status === 'measuring') {
         startAcquisitionIndicator();
 
-        // Handle a valid reading that arrived during startup
         completeAcquisitionIfValid();
     } else {
         stopAcquisitionIndicator();
@@ -510,7 +593,6 @@ function updateSignalQuality(quality) {
         }
     }
 
-    // Added: complete initial acquisition on first valid reading
     completeAcquisitionIfValid();
 
     updateRipples();
