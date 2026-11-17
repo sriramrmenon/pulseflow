@@ -1,441 +1,289 @@
-
 # PulseFlow
 
-PulseFlow is a camera-based breathing visualisation application built using the Presage SmartSpectra SDK.
+**Real-time, camera-based breathing visualisation using the Presage SmartSpectra SDK.**
 
-The application aims to display real-time breathing measurements captured through a webcam and provide an interactive breathing animation.
+PulseFlow is a desktop application built with Node.js, Electron and the Presage SmartSpectra SDK. It uses a standard camera to estimate a person's breathing rate and displays the result through an interactive breathing visualisation.
 
-This project is being developed as part of the **Presage SmartSpectra SDK Challenge 2026** on DEV Community.
+The application provides live breathing-rate measurements, signal-quality feedback, camera-positioning guidance and breathing-inspired animations.
 
-## Project Overview
+PulseFlow was developed for the **Presage SmartSpectra SDK Challenge 2026**.
 
-The goal of PulseFlow is to explore how camera-based physiological measurements can be integrated into an interactive desktop application.
+## Features
 
-Using the Presage SmartSpectra SDK, the application will process camera input to obtain breathing measurements and present them through a simple, user-friendly interface.
-
-PulseFlow is intended as an experimental wellness and educational application, not a medical device.
-
-## Objectives
-
-The main objectives of this project are:
-
-- Learn how to integrate a third-party SDK into a Node.js application.
-- Understand how to capture and process real-time measurements.
-- Develop practical JavaScript and application development skills.
-- Create an interactive breathing visualisation.
-- Implement appropriate camera permissions and responsible data handling.
-- Build and document a functional application for the DEV Community challenge.
-
-## Planned Features
-
-The following features are planned for the initial version:
-
-- **Camera Access:** Allow users to enable their webcam with explicit consent.
-- **Live Breathing Rate:** Display breathing measurements provided by the SmartSpectra SDK.
-- **Breathing Visualisation:** Create an animated circle that responds to the breathing signal.
-- **Guided Breathing:** Provide an optional guided breathing exercise.
-- **Measurement Status:** Display SDK feedback when lighting, movement or camera conditions affect measurement quality.
-- **Start/Stop Controls:** Allow users to start and stop a measurement session.
-- **Privacy:** Clearly explain camera access, processing and any data storage or transmission.
-
-Features will be implemented incrementally and may change as the project develops.
+- **Contactless breathing measurement:** Uses the SmartSpectra SDK to estimate breathing rate from a camera.
+- **Live breathing-rate display:** Shows measurements in breaths per minute.
+- **Signal validation:** Displays measurement quality and distinguishes stable, unstable and unavailable signals.
+- **Breathing waveform:** Displays a breathing-inspired animated trace whose cycle duration follows the measured breathing rate.
+- **Breathing ripples:** Generates expanding visual ripples that respond to the measured breathing rate.
+- **Camera-positioning guidance:** Displays SDK feedback to help users improve measurement conditions.
+- **Measurement acquisition indicator:** Shows when the application is waiting for a valid breathing signal.
+- **Camera selection:** Allows users to select an available camera.
+- **Camera consent:** Requests confirmation before starting a measurement.
+- **Start and Stop controls:** Allows users to manage measurement sessions.
+- **Responsive interface:** Adjusts the layout when the Electron window is resized.
 
 ## Technology Stack
 
 | Technology | Purpose |
-|------------|---------|
-| JavaScript | Application programming language |
-| Node.js 24 | JavaScript runtime environment |
-| npm | Package and dependency management |
-| Presage SmartSpectra SDK | Camera-based physiological signal measurements |
-| Electron (planned) | Desktop application framework |
-| HTML/CSS (planned) | User interface and visualisation |
-| Git | Version control |
-| Bitbucket | Private development repository |
-| GitHub (planned) | Public repository for challenge submission |
+|---|---|
+| Node.js | JavaScript runtime |
+| Electron | Desktop application framework |
+| SmartSpectra Node.js SDK | Camera-based breathing measurements |
+| JavaScript | Application logic and event handling |
+| HTML and CSS | Application interface and animations |
+| Playwright | Automated Electron UI and regression testing |
 
-## Development Environment
+## Prerequisites
 
-The project is currently being developed on:
+Before running PulseFlow, ensure you have:
 
-- Operating System: Lubuntu Linux
-- Architecture: x86_64
-- Node.js: v24.22.2
-- npm: 11.x
-- Node Version Manager (NVM)
+- Node.js 24 (the version used during development).
+- npm.
+- A supported desktop operating system.
+- A working camera.
+- A valid Presage SmartSpectra API key.
+- Permission to access the camera.
 
-The required Node.js version is specified in `.nvmrc`.
+Refer to the [SmartSpectra Node.js documentation](https://smartspectra.presagetech.com/docs/nodejs/) for current operating-system and hardware requirements.
 
-## Project Setup
+## Installation
 
-The following steps initialise the Node.js project.
-
-### Prerequisites
-
-- Git
-- Node.js 24
-- npm
-- NVM (recommended)
-
-### Clone the Repository
-
-Clone the repository using your authorised repository URL:
+### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/sriramrmenon/pulseflow.git
 cd pulseflow
 ```
 
-### Select the Node.js Version
+### 2. Install dependencies
 
 ```bash
-nvm use
+npm ci
 ```
 
-### Install Dependencies
+This installs the dependencies specified in the project's lockfile.
 
-Once dependencies have been added to the project, install them using:
+### 3. Configure the API key
+
+Create a developer account and obtain an API key from the [Presage Developer Portal](https://physiology.presagetech.com/).
+
+On macOS or Linux, set the environment variable:
 
 ```bash
-npm install
+export SMARTSPECTRA_API_KEY="your_api_key_here"
 ```
 
-**Note:** The SmartSpectra SDK and Electron have not yet been integrated. Application execution instructions will be added as development progresses.
+The API key must be configured in the terminal session used to launch the application.
 
-## Development Status
+Do not commit API keys, credentials or environment files containing secrets to Git.
 
-**Current stage: Initial Project Setup**
-
-Completed:
-
-- [x] Created the private Bitbucket repository.
-- [x] Installed Node.js 24 using NVM.
-- [x] Initialised the Node.js project.
-- [x] Created the initial `package.json`.
-- [x] Added `.nvmrc`.
-- [x] Added `.gitignore`.
-- [x] Created the initial project documentation.
-
-Planned:
-
-- [ ] Review the SmartSpectra SDK integration requirements.
-- [ ] Install and configure the SmartSpectra SDK.
-- [ ] Verify webcam access and SDK measurements.
-- [ ] Implement live breathing measurement handling.
-- [ ] Create the Electron application interface.
-- [ ] Implement breathing visualisation and controls.
-- [ ] Test application functionality and privacy behaviour.
-- [ ] Record a demonstration video.
-- [ ] Publish the project repository on GitHub.
-- [ ] Submit the project to the DEV Community challenge.
-
-## Privacy and Responsible Use
-
-PulseFlow is intended for educational and general wellness purposes only.
-
-It is not intended for medical diagnosis, treatment or clinical decision-making.
-
-Camera access will require user consent.
-
-The application's handling of camera frames, physiological measurements, SDK telemetry, storage and data retention will be documented once the SDK integration has been implemented and verified.
-
-API keys and other credentials must not be committed to the repository.
-
-## Challenge Information
-
-**Challenge:** Presage SmartSpectra SDK Challenge 2026
-
-**Platform:** DEV Community
-
-**Submission Deadline:** 22 November 2026
-
-**Challenge:** https://dev.to/challenges/presage-2026-11-04
-
-The final submission is expected to include:
-
-- A functional application using at least one live SmartSpectra signal.
-- A public source-code repository.
-- Application setup instructions.
-- A demonstration video.
-- A DEV Community submission article.
-- An explanation of camera consent and data handling.
-
-## Licence
-
-The project licence has not yet been finalised. The application licence and the SmartSpectra SDK's licensing requirements will be reviewed before public release.
-
-# Camera Integration and Testing (macOS)
-
-## Overview
-
-PulseFlow uses the Presage SmartSpectra Node.js SDK to measure breathing rate through a webcam without requiring physical sensors.
-
-Camera integration has been tested on macOS using the built-in FaceTime HD Camera.
-
-## 1. System Requirements
-
-- macOS with a supported webcam
-- Node.js v24.22.2 (tested version)
-- npm
-- SmartSpectra Node.js SDK (`@smartspectra/node-sdk`)
-- Valid Presage Physiology API key
-- Camera permissions enabled for the terminal application
-
-## 2. Installation and Setup
-
-Clone the PulseFlow repository and navigate to the project directory.
-
-Install the dependencies:
+### 4. Start PulseFlow
 
 ```bash
-npm install
+npm start
 ```
 
-Configure the SmartSpectra API key as an environment variable:
+The Electron application should open and attempt to discover available cameras.
+
+## How to Use
+
+1. Launch PulseFlow.
+2. Select a camera from the list of available devices.
+3. Click **Start**.
+4. Confirm camera access when prompted.
+5. Position yourself in front of the camera with your face and upper chest visible.
+6. Remain relatively still while the application attempts to obtain a stable breathing signal.
+7. Follow the positioning guidance displayed by PulseFlow.
+8. Once a stable measurement is available, the breathing rate and visualisations update.
+9. Click **Stop** to end the measurement.
+
+The application can retain the last available reading after stopping. Where a reading has not been verified as stable, it is labelled accordingly.
+
+## Understanding the Display
+
+### Breathing Rate
+
+Displays the estimated breathing rate in breaths per minute.
+
+### Signal Quality
+
+Indicates whether a measurement is stable, unstable, unavailable or represents a previously valid reading.
+
+### Breathing Visualisation
+
+PulseFlow provides two animated visualisations:
+
+**Breathing waveform**
+
+A simulated, breathing-inspired trace whose cycle duration is calculated using the breathing-rate estimate.
+
+**Breathing ripples**
+
+Expanding ripples that respond to the estimated breathing frequency.
+
+These visualisations are driven by the SmartSpectra breathing-rate metric. They do not represent directly measured inhalation or exhalation waveforms.
+
+### Positioning Guidance
+
+SmartSpectra validation messages are presented to help users improve measurement conditions.
+
+The guidance remains visible while a stable measurement is unavailable and is hidden when a fresh stable reading is obtained or the session stops.
+
+## SmartSpectra SDK Integration
+
+PulseFlow integrates the `@smartspectra/node-sdk` package.
+
+The application uses the SDK to:
+
+- Discover available cameras.
+- Select the camera for measurement.
+- Initialise and start a measurement session.
+- Receive breathing metrics.
+- Decode the SDK metric payload.
+- Process validation and measurement-quality information.
+- Stop measurements and release SDK resources.
+
+A breathing-rate value is treated as a valid live reading only when it is numerical, marked stable by the SDK and accompanied by a valid SDK validation state.
+
+When a measurement becomes stale or unstable, PulseFlow stops the live animations rather than presenting an old reading as a current measurement.
+
+The application also includes a modular command-line prototype for testing the SmartSpectra integration separately from the Electron interface.
+
+## Testing
+
+PulseFlow uses Playwright for automated Electron UI testing.
+
+The test suite covers:
+
+- Application startup and visibility of the main controls.
+- Initial state without measurements.
+- Flat waveform when no live measurement exists.
+- Creation of breathing ripple elements.
+- Measurement acquisition feedback.
+- Activation of visualisations after a valid reading.
+- Handling stale measurements.
+- Persistent positioning guidance.
+- Retention of the last valid reading after stopping.
+- Prevention of live animations for unverified measurements.
+
+Run the test suite using:
 
 ```bash
-export SMARTSPECTRA_API_KEY="YOUR_API_KEY"
+npm run test:smoke
 ```
 
-Never commit API keys or credentials to the repository.
+During development, all 10 automated tests passed.
 
-Verify that the environment variable is configured:
+The automated tests use simulated SDK-facing events to verify Electron and renderer behaviour. They do not independently validate the accuracy of the SmartSpectra measurements or replace testing with a physical camera.
 
-```bash
-node -e "console.log(Boolean(process.env.SMARTSPECTRA_API_KEY))"
-```
+## Camera Consent and Data Handling
 
-Expected output:
+PulseFlow requires explicit user confirmation before starting a camera-based measurement.
+
+### Camera access
+
+- The user selects the camera before starting a session.
+- The application requests confirmation before beginning measurement.
+- Camera access is used for SmartSpectra breathing measurements.
+- Stopping or closing the application initiates SDK and camera-resource cleanup.
+
+### Measurement data
+
+PulseFlow displays breathing-rate measurements, quality information and positioning guidance.
+
+The current implementation does not include an application database, user accounts, cloud synchronisation or a feature for uploading measurement histories.
+
+The most recent reading may remain visible in the interface after a session stops.
+
+PulseFlow does not intentionally save camera recordings or snapshots as application files.
+
+### SmartSpectra SDK telemetry
+
+The SmartSpectra SDK has diagnostic session telemetry enabled by default unless it is explicitly disabled in SDK configuration.
+
+According to Presage's documentation, this diagnostic telemetry can include aggregate session information such as SDK version, operating system, session outcome, performance statistics and counts of validation states.
+
+Presage states that this telemetry does not contain raw camera frames, measured breathing-rate values or stable user identifiers.
+
+The SDK may communicate with Presage services as part of its normal operation.
+
+For details, see [SmartSpectra SDK Telemetry and Privacy](https://smartspectra.presagetech.com/docs/telemetry-and-privacy/).
+
+### Third-party AI services
+
+PulseFlow's current measurement and visualisation workflow does not integrate external generative AI services.
+
+### Retention and deletion
+
+PulseFlow does not currently provide persistent storage for breathing-measurement history.
+
+Measurements held by the running application are not intended to persist as a history after the application closes.
+
+SDK-side data handling and telemetry are governed by Presage's own documentation and policies.
+
+## Limitations
+
+- PulseFlow is a prototype intended for demonstration and general informational use.
+- Breathing-rate estimates depend on camera positioning, lighting, motion and signal quality.
+- Obtaining a stable measurement may take time.
+- The visual waveform is simulated from the measured breathing rate rather than generated from a measured respiratory waveform.
+- A stable breathing-rate estimate does not identify the exact timing of individual inhalations and exhalations.
+- Automated UI tests use simulated events and cannot establish clinical or measurement accuracy.
+- The application has not been packaged into platform-specific installers.
+
+**PulseFlow is not a medical device and must not be used for diagnosis, treatment or medical decision-making.**
+
+## Project Structure
 
 ```text
-true
+pulseflow/
+├── main.js
+├── preload.js
+├── renderer.js
+├── index.html
+├── styles.css
+├── cameratest.js
+├── measurement.js
+├── menu.js
+├── tests/
+│   └── pulseflow.spec.js
+├── package.json
+├── package-lock.json
+└── README.md
 ```
 
-This confirms that the variable contains a value, but does not validate the key with Presage.
+Main components:
 
-## 3. Running PulseFlow
+- `main.js` — Electron main process and SmartSpectra SDK integration.
+- `preload.js` — Secure IPC bridge between the Electron main process and renderer.
+- `renderer.js` — UI interaction, breathing visualisations and measurement feedback.
+- `styles.css` — Responsive layout and visual styling.
+- `index.html` — Application structure.
+- `cameratest.js` — Command-line entry point for SDK testing.
+- `menu.js` — Command-line measurement menu.
+- `measurement.js` — SDK lifecycle and metrics processing for the terminal prototype.
+- `tests/pulseflow.spec.js` — Automated Electron UI and regression tests.
 
-Start the application:
+## Future Improvements
 
-```bash
-node cameratest.js
-```
+Possible future enhancements include:
 
-The application discovers available cameras and displays a numbered list.
+- Visualising additional SmartSpectra metrics.
+- Session-based breathing artwork.
+- Persistent measurement history with appropriate privacy controls.
+- Additional automated integration tests.
+- Application packaging for desktop distribution.
+- CI/CD and observability integration.
 
-Example output from testing:
+These features are not part of the current challenge submission.
 
-```text
-Available cameras:
-1. FaceTime HD Camera
+## Acknowledgements
 
-Enter camera number: 1
-Selected camera: FaceTime HD Camera
+- [Presage Technologies](https://presagetech.com/) — SmartSpectra SDK.
+- [Electron](https://www.electronjs.org/) — Desktop application framework.
+- [Playwright](https://playwright.dev/) — Automated testing framework.
+- [DEV Community](https://dev.to/) — Presage SmartSpectra SDK Challenge 2026.
 
-Allow PulseFlow to use "FaceTime HD Camera" for breathing measurement? (yes/no): yes
-```
+---
 
-Camera access is requested explicitly before a measurement session begins.
-
-After consent, the application displays:
-
-```text
-PulseFlow Measurement Menu
-1. Start measurement
-2. Stop measurement
-3. Exit
-```
-
-Selecting option 1 starts SmartSpectra measurement. Option 2 stops the session and attempts SDK cleanup. Option 3 exits the application.
-
-Ctrl+C also initiates the shutdown procedure.
-
-## 4. Camera Positioning and Measurement Quality
-
-SmartSpectra uses camera images to estimate physiological signals. Suitable framing, positioning and lighting are important for obtaining stable measurements.
-
-Recommended conditions:
-
-- Face the camera directly.
-- Keep your face clearly visible.
-- Position the camera so that sufficient upper chest area is visible.
-- Use consistent, adequate lighting.
-- Avoid excessive movement during measurement.
-- Allow time for the breathing signal to stabilise.
-
-During testing, the SDK returned the following validation messages:
-
-| Validation code | Message |
-|---|---|
-| 0 | Hold still and record |
-| 1 | No face found |
-| 7 | Place more of the chest in view |
-
-PulseFlow displays validation messages so users can adjust their positioning when necessary.
-
-## 5. Breathing Measurements
-
-The application retrieves breathing measurements through the SmartSpectra metrics event.
-
-Each breathing measurement includes:
-
-- **value:** Breathing rate in breaths per minute.
-- **stable:** Whether the SDK marks the measurement as stable.
-- **confidence:** SDK-provided confidence value.
-
-Example output from live testing:
-
-```text
-Breathing measurement: 14.41 breaths/min | Stable: true | Confidence: 51.42
-Breathing measurement: 17.03 breaths/min | Stable: true | Confidence: 56.58
-Breathing measurement: 23.80 breaths/min | Stable: true | Confidence: 60.27
-```
-
-PulseFlow displays breathing measurements only when the value is finite, the current validation status is `kOk`, and the SDK reports `stable: true`.
-
-When the measurement is unavailable or unstable, the application displays messages such as:
-
-```text
-Waiting for a valid breathing signal...
-No breathing signal available. Waiting...
-Breathing signal is not stable yet.
-```
-
-Quality messages are limited to approximately one every five seconds to reduce repetitive console output.
-
-A stable signal is an SDK quality indication, not a guarantee of clinical accuracy.
-
-## 6. Observed SDK Warnings and Errors
-
-The following warnings were observed during testing on macOS.
-
-### AVFoundation Camera Warnings
-
-```text
-AVFoundation: device does not support continuous auto-exposure
-AVFoundation: device does not support continuous auto white balance
-AVFoundation: device does not support continuous auto-focus
-```
-
-Additional warnings indicated that the camera did not support locking exposure, white balance or focus.
-
-These warnings describe unsupported camera capabilities.
-
-They did not prevent the application from receiving breathing measurements during the successful tests.
-
-### Inference Feedback Warning
-
-```text
-Feedback manager requires a model with a single signature inference.
-Disabling support for feedback tensors.
-```
-
-This warning originated from the underlying inference components. Measurements were still produced during testing.
-
-### Landmark Projection Warning
-
-```text
-Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI.
-```
-
-This warning was observed during processing. Its effect was not independently investigated, but it did not prevent successful breathing measurements in the recorded tests.
-
-### SDK State Error
-
-```text
-SmartSpectra is not in a valid state for this operation.
-```
-
-This error was occasionally observed during measurement shutdown.
-
-In the affected tests, the Stop operation subsequently completed. Later Stop tests completed without this error.
-
-### API Authentication Error
-
-An HTTP 401 authentication error was initially encountered:
-
-```text
-Metrics authorization failed.
-Status: 401
-Invalid or missing API key
-```
-
-The SDK rejected the supplied credentials.
-
-Subsequent tests completed successfully and produced live breathing measurements without the authentication error recurring.
-
-## 7. Functional Testing Results
-
-Testing was performed on macOS using the built-in FaceTime HD Camera.
-
-| Test case | Result |
-|---|---|
-| Detect available camera | Passed |
-| Select camera | Passed |
-| Request explicit camera consent | Passed |
-| Start measurement | Passed |
-| Receive live breathing readings | Passed |
-| Receive validation status and hints | Passed |
-| Identify stable measurements | Passed |
-| Display confidence values | Passed |
-| Handle missing and unstable readings | Passed |
-| Stop measurement | Passed |
-| Restart measurement after Stop | Passed |
-| Start → Stop → Start → Stop → Exit | Passed |
-| Ctrl+C graceful shutdown | Passed |
-
-## 8. Known Limitations
-
-- Camera capability warnings may appear depending on the hardware.
-- Measurement quality depends on lighting, positioning and movement.
-- Unstable or missing measurements are not displayed as valid breathing readings.
-- A prolonged absence of metrics events is not currently detected using a dedicated timeout.
-- Native SDK resource release was assessed through successful Stop, restart and process exit behaviour, rather than independent resource inspection.
-- PulseFlow is a prototype and its breathing measurements should not be treated as medical diagnoses.
-
-## 9. Conclusion
-
-SmartSpectra camera integration has been successfully verified on macOS.
-
-PulseFlow can detect and select a camera, obtain user consent, start breathing measurements, display validation guidance, report stable breathing values and stop or restart measurement sessions.
-
-The application also supports shutdown through the menu and Ctrl+C.
-
-The macOS camera integration requirements for PUL-20 have been functionally verified.
-
-
-## Electron Application Architecture
-
-PulseFlow uses Electron to provide a desktop interface for camera-based breathing measurements.
-
-### Main Process (`main.js`)
-- Creates and manages the application window.
-- Handles application lifecycle events.
-- Configures Electron security settings.
-- Will eventually manage communication with the SmartSpectra SDK.
-
-### Renderer Process (`index.html`)
-- Displays the PulseFlow interface.
-- Will display live breathing measurements and validation messages.
-- Does not have direct access to Node.js APIs.
-
-### Preload Script (`preload.js`)
-- Provides a controlled communication bridge between the main and renderer processes.
-- Will use Electron's `contextBridge` and IPC APIs when SDK integration is implemented.
-- Currently contains no application logic.
-
-### Security Configuration
-
-The application uses the following Electron settings:
-
-- `nodeIntegration: false`
-- `contextIsolation: true`
-- A dedicated preload script
-
-These settings help isolate the renderer from privileged Node.js operations.
-
-### Current Implementation
-
-The Electron application successfully opens a desktop window on macOS.
-
-The existing SmartSpectra prototype (`cameratest.js`) remains separate and unchanged. Integration with the desktop interface will be implemented in subsequent development tasks.
+**PulseFlow — Camera-based breathing measurement, brought to life through interactive visualisation.**
