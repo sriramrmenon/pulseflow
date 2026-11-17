@@ -3,18 +3,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>PulseFlow</title>
+
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <main class="app">
+
+        <!-- Application header -->
         <header class="header">
             <h1>PulseFlow</h1>
-            <span id="session-status">Not measuring</span>
+
+            <span
+                id="session-status"
+                role="status"
+            >
+                Not measuring
+            </span>
         </header>
 
+        <!-- Live breathing measurement -->
         <section class="measurement">
+
             <h2>Live Breathing Rate</h2>
 
             <div class="rate">
@@ -22,35 +39,100 @@
                 <span class="unit">breaths/min</span>
             </div>
 
-            <div class="breathing-circle">
-                <span>●</span>
+            <!-- Breathing visualisation -->
+            <div
+                class="breathing-circle"
+                aria-hidden="true"
+            >
+                <span class="circle-centre"></span>
             </div>
 
-            <p id="measurement-message">
+            <p
+                id="measurement-message"
+                role="status"
+            >
                 Waiting for measurement
             </p>
+
         </section>
 
+        <!-- Signal and camera information -->
         <section class="details">
+
             <div class="detail-card">
                 <h3>Signal Quality</h3>
-                <p id="signal-quality">Unavailable</p>
+
+                <p id="signal-quality">
+                    Unavailable
+                </p>
             </div>
 
             <div class="detail-card">
                 <h3>Camera</h3>
-                <p id="camera-status">Not selected</p>
+
+                <p id="camera-status">
+                    Not selected
+                </p>
+
+                <label
+                    for="camera-select"
+                    class="camera-label"
+                >
+                    Select camera
+                </label>
+
+                <select id="camera-select" disabled>
+                    <option value="">
+                        Loading cameras...
+                    </option>
+                </select>
             </div>
+
         </section>
 
+        <!-- Measurement controls -->
         <section class="controls">
-            <button id="start-button" disabled>Start</button>
-            <button id="stop-button" disabled>Stop</button>
+
+            <button
+                id="start-button"
+                type="button"
+                disabled
+            >
+                Start
+            </button>
+
+            <button
+                id="stop-button"
+                type="button"
+                disabled
+            >
+                Stop
+            </button>
+
         </section>
 
+        <!-- SDK guidance and error messages -->
+        <section
+            class="feedback"
+            aria-live="polite"
+        >
+            <p id="validation-message">
+                Select a camera to begin.
+            </p>
+        </section>
+
+        <!-- Application footer -->
         <footer>
-            Powered by SmartSpectra
+            <p>Powered by SmartSpectra</p>
+
+            <p class="disclaimer">
+                Prototype for demonstration purposes.
+                Not intended for medical use.
+            </p>
         </footer>
+
     </main>
+
+    <script src="renderer.js"></script>
 </body>
 </html>

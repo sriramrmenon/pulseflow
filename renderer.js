@@ -14,7 +14,7 @@ const validationMessage = document.getElementById('validation-message');
 
 let currentSessionStatus = 'idle';
 
-// Floating positioning guidance popup
+// Persistent positioning guidance
 const guidancePopup = document.createElement('div');
 guidancePopup.className = 'guidance-popup';
 guidancePopup.setAttribute('role', 'status');
@@ -22,31 +22,62 @@ guidancePopup.setAttribute('aria-live', 'polite');
 
 document.body.appendChild(guidancePopup);
 
-let guidanceTimeout = null;
 let previousGuidance = '';
+let guidanceIsNeeded = false;
 
 function showGuidancePopup(message) {
-    if (currentSessionStatus !== 'measuring') {
-        return;
-    }
-
-    // Avoid repeatedly displaying the same instruction
     if (
-        message === previousGuidance &&
-        guidancePopup.classList.contains('visible')
+        currentSessionStatus !== 'measuring' ||
+        !guidanceIsNeeded ||
+        !message
     ) {
         return;
     }
 
-    previousGuidance = message;
-    guidancePopup.textContent = message;
+    // Update text only when the message changes.
+    // Do not restart the popup animation on repeated messages.
+    if (message !== previousGuidance) {
+        guidancePopup.textContent = message;
+        previousGuidance = message;
+    }
+
     guidancePopup.classList.add('visible');
+}
 
-    clearTimeout(guidanceTimeout);
+function hideGuidancePopup() {
+    guidancePopup.classList.remove('visible');
+    previousGuidance = '';
+}
 
-    guidanceTimeout = setTimeout(() => {
-        guidancePopup.classList.remove('visible');
-    }, 4000);
+function updateGuidanceVisibility() {
+    if (currentSessionStatus !== 'measuring') {
+        hideGuidancePopup();
+        return;
+    }
+
+    // Hide guidance once a fresh stable reading is available.
+    if (hasLiveBreathingSignal()) {
+        guidanceIsNeeded = false;
+        hideGuidancePopup();
+        return;
+    }
+
+    guidanceIsNeeded = true;
+
+    const message = validationMessage.textContent;
+
+    const defaultMessage =
+        'Keep your face and upper body visible. Remain still while PulseFlow detects your breathing.';
+
+    const isGenericMessage =
+        !message ||
+        message === 'Hold still and record.' ||
+        message === 'Measurement stopped.' ||
+        message === 'Select a camera and click Start to begin.';
+
+    showGuidancePopup(
+        isGenericMessage ? defaultMessage : message
+    );
 }
 
 // Full-window breathing ripples
@@ -126,7 +157,7 @@ if (measurementPanel) {
 
 let waveformFrame = null;
 
-// Added: breathing measurement acquisition indicator
+// Breathing measurement acquisition indicator
 const acquisitionIndicator = document.createElement('div');
 acquisitionIndicator.className = 'acquisition-indicator';
 acquisitionIndicator.setAttribute('role', 'status');
@@ -202,27 +233,104 @@ function hasLiveBreathingSignal() {
     );
 }
 
-// Animated waveform based on the breathing rate
+// Rate-driven breathing waveform state
+let breathingPhase = 0;
+let previousFrameTime = null;
+let smoothedBreathingRate = null;
+
+const waveformSamples = [];
+const waveformSampleInterval = 50;
+const waveformMaxSamples = 181;
+
+let lastWaveformSampleTime = null;
+
+// Continuously drawn breathing-inspired waveform
 function animateWaveform(timestamp) {
     if (!hasLiveBreathingSignal()) {
         waveformFrame = null;
+        previousFrameTime = null;
+        smoothedBreathingRate = null;
+        breathingPhase = 0;
+        lastWaveformSampleTime = null;
+        waveformSamples.length = 0;
+
         waveformPath.setAttribute('d', 'M 0 25 L 180 25');
         return;
     }
 
-    const rate = Number(element.textContent);
-    const phase = (timestamp / 1000) * 2 * Math.PI * (rate / 60);
+    const measuredRate = Number(element.textContent);
 
-    let path = '';
-
-    for (let x = 0; x <= 180; x += 3) {
-        const angle = (x / 180) * 4 * Math.PI - phase;
-        const y = 25 - Math.sin(angle) * 14;
-
-        path += `${x === 0 ? 'M' : 'L'} ${x} ${y} `;
+    if (smoothedBreathingRate === null) {
+        smoothedBreathingRate = measuredRate;
     }
 
+    const elapsed = previousFrameTime === null
+        ? 0
+        : Math.min((timestamp - previousFrameTime) / 1000, 0.1);
+
+    previousFrameTime = timestamp;
+
+    // Smooth transitions between measured breathing rates
+    const smoothing = 1 - Math.exp(-elapsed * 2);
+
+    smoothedBreathingRate +=
+        (measuredRate - smoothedBreathingRate) * smoothing;
+
+    // Advance breathing phase using the measured rate
+    breathingPhase = (
+        breathingPhase +
+        elapsed * (smoothedBreathingRate / 60)
+    ) % 1;
+
+    // Smooth simulated inhalation and exhalation
+    let amplitude;
+
+    if (breathingPhase < 0.35) {
+        const progress = breathingPhase / 0.35;
+
+        amplitude =
+            (1 - Math.cos(Math.PI * progress)) / 2;
+
+    } else if (breathingPhase < 0.85) {
+        const progress =
+            (breathingPhase - 0.35) / 0.5;
+
+        amplitude =
+            (1 + Math.cos(Math.PI * progress)) / 2;
+
+    } else {
+        amplitude = 0;
+    }
+
+    const y = 38 - amplitude * 26;
+
+    // Collect samples at a consistent interval
+    if (
+        lastWaveformSampleTime === null ||
+        timestamp - lastWaveformSampleTime >= waveformSampleInterval
+    ) {
+        waveformSamples.push(y);
+
+        if (waveformSamples.length > waveformMaxSamples) {
+            waveformSamples.shift();
+        }
+
+        lastWaveformSampleTime = timestamp;
+    }
+
+    // Draw the most recent samples from left to right
+    const lastIndex = waveformSamples.length - 1;
+
+    const path = waveformSamples.map((value, index) => {
+        const x = lastIndex > 0
+            ? (index / lastIndex) * Math.min(lastIndex, 180)
+            : 0;
+
+        return `${index === 0 ? 'M' : 'L'} ${x} ${value}`;
+    }).join(' ');
+
     waveformPath.setAttribute('d', path);
+
     waveformFrame = requestAnimationFrame(animateWaveform);
 }
 
@@ -241,7 +349,12 @@ function updateWaveform() {
             waveformFrame = null;
         }
 
-        // Straight line when no fresh stable measurement exists
+        waveformSamples.length = 0;
+        previousFrameTime = null;
+        smoothedBreathingRate = null;
+        breathingPhase = 0;
+        lastWaveformSampleTime = null;
+
         waveformPath.setAttribute('d', 'M 0 25 L 180 25');
     }
 }
@@ -265,9 +378,12 @@ function updateRipples() {
     updateWaveform();
 }
 
-// Receive actual breathing measurements
+// Receive breathing measurements
 function updateBreathingRate(rate) {
-    if (typeof rate === 'number' && Number.isFinite(rate)) {
+    if (
+        typeof rate === 'number' &&
+        Number.isFinite(rate)
+    ) {
         element.textContent = rate.toFixed(2);
 
         if (currentSessionStatus === 'measuring') {
@@ -286,9 +402,8 @@ function updateBreathingRate(rate) {
         }
     }
 
-    // Added: complete initial acquisition on first valid reading
     completeAcquisitionIfValid();
-
+    updateGuidanceVisibility();
     updateRipples();
 }
 
@@ -344,7 +459,6 @@ async function startMeasurement() {
         return;
     }
 
-    // Ask for explicit camera consent
     const consentGranted = window.confirm(
         'Allow PulseFlow to use the selected camera ' +
         'for breathing measurement?'
@@ -366,7 +480,10 @@ async function startMeasurement() {
             consentGranted
         );
     } catch (error) {
-        console.error('Unable to start measurement:', error);
+        console.error(
+            'Unable to start measurement:',
+            error
+        );
 
         sessionStatus.textContent = 'Error';
         validationMessage.textContent = error.message;
@@ -375,8 +492,8 @@ async function startMeasurement() {
         cameraSelect.disabled = false;
         stopButton.disabled = true;
 
-        // Added: hide indicator on start error
         stopAcquisitionIndicator();
+        hideGuidancePopup();
     }
 }
 
@@ -385,13 +502,16 @@ async function stopMeasurement() {
     stopButton.disabled = true;
     sessionStatus.textContent = 'Stopping...';
 
-    // Added: stop loading indicator immediately
     stopAcquisitionIndicator();
+    hideGuidancePopup();
 
     try {
         await window.pulseFlow.stopMeasurement();
     } catch (error) {
-        console.error('Unable to stop measurement:', error);
+        console.error(
+            'Unable to stop measurement:',
+            error
+        );
 
         sessionStatus.textContent = 'Error';
         validationMessage.textContent = error.message;
@@ -400,23 +520,21 @@ async function stopMeasurement() {
 
 // Update session status
 function updateSessionStatus(status) {
+    const previousStatus = currentSessionStatus;
     currentSessionStatus = status;
 
-    // Hide positioning guidance when not measuring
-    if (status !== 'measuring') {
-        clearTimeout(guidanceTimeout);
-        guidancePopup.classList.remove('visible');
-        previousGuidance = '';
-    }
-
-    // Added: manage initial measurement acquisition
     if (status === 'measuring') {
-        startAcquisitionIndicator();
+        // Start the acquisition indicator only when entering
+        // the measuring state, not on repeated status events.
+        if (previousStatus !== 'measuring') {
+            startAcquisitionIndicator();
+        }
 
-        // Handle a valid reading that arrived during startup
         completeAcquisitionIfValid();
     } else {
         stopAcquisitionIndicator();
+        hideGuidancePopup();
+        guidanceIsNeeded = false;
     }
 
     if (status === 'starting') {
@@ -447,14 +565,16 @@ function updateSessionStatus(status) {
         stopButton.disabled = true;
         cameraSelect.disabled = false;
 
-        // Retain the last breathing rate after Stop
         if (status === 'idle') {
-            const hasRecordedRate = element.textContent !== '--';
+            const hasRecordedRate =
+                element.textContent !== '--';
 
             if (!hasRecordedRate) {
                 measurementMessage.textContent =
                     'No measurement recorded';
-            } else if (signalQuality.textContent === 'Unverified') {
+            } else if (
+                signalQuality.textContent === 'Unverified'
+            ) {
                 measurementMessage.textContent =
                     'Last observed rate - unstable, not verified';
             } else {
@@ -467,6 +587,7 @@ function updateSessionStatus(status) {
         }
     }
 
+    updateGuidanceVisibility();
     updateRipples();
 }
 
@@ -474,20 +595,12 @@ function updateSessionStatus(status) {
 function updateValidationStatus(message) {
     validationMessage.textContent = message;
 
-    if (
-        currentSessionStatus === 'measuring' &&
-        message &&
-        message !== 'Hold still and record.' &&
-        message !== 'Measurement stopped.'
-    ) {
-        showGuidancePopup(message);
-    } else {
-        clearTimeout(guidanceTimeout);
-        guidancePopup.classList.remove('visible');
-    }
+    // No four-second timer: the guidance remains visible
+    // while a fresh stable breathing signal is unavailable.
+    updateGuidanceVisibility();
 }
 
-// Signal quality and stale-reading message
+// Update signal quality
 function updateSignalQuality(quality) {
     signalQuality.textContent = quality;
 
@@ -510,17 +623,16 @@ function updateSignalQuality(quality) {
         }
     }
 
-    // Added: complete initial acquisition on first valid reading
     completeAcquisitionIfValid();
-
+    updateGuidanceVisibility();
     updateRipples();
 }
 
 // Update selected camera
 function handleCameraChange() {
     cameraStatus.textContent =
-        cameraSelect.selectedOptions[0]?.textContent
-        || 'Not selected';
+        cameraSelect.selectedOptions[0]?.textContent ||
+        'Not selected';
 }
 
 // Register event listeners

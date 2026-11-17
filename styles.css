@@ -1,68 +1,115 @@
 
+/* =========================================
+   PulseFlow - Responsive Layout
+   ========================================= */
+
 /* Global styles */
 
 * {
     box-sizing: border-box;
 }
 
+html,
 body {
+    width: 100%;
+    height: 100%;
     margin: 0;
-    min-height: 100vh;
+}
+
+body {
     font-family: Arial, Helvetica, sans-serif;
     background: #101827;
     color: #ffffff;
+    overflow: hidden;
 }
 
-/* Main application container */
+/* Main application layout */
 
 .app {
-    max-width: 700px;
+    width: 100%;
+    max-width: 850px;
+
+    height: 100vh;
+    height: 100dvh;
+
     margin: 0 auto;
-    padding: 30px;
+    padding: 14px 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-height: 0;
+    overflow: hidden;
 }
 
-/* Header */
+/* =========================================
+   Header
+   ========================================= */
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 12px;
+
+    flex: 0 0 auto;
+    min-width: 0;
 }
 
 .header h1 {
     color: #62d9bd;
-    font-size: 32px;
+    font-size: 28px;
     margin: 0;
 }
 
 #session-status {
     background: #293648;
     color: #ffffff;
-    padding: 8px 14px;
+    padding: 7px 12px;
     border-radius: 20px;
-    font-size: 13px;
+
+    font-size: 12px;
     white-space: nowrap;
 }
 
-/* Main measurement panel */
+/* =========================================
+   Main measurement panel
+
+   Important:
+   This section uses the remaining space.
+   It must shrink when the window shrinks.
+   ========================================= */
 
 .measurement {
     position: relative;
+
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
     background: #1a2638;
-    padding: 35px 20px;
-    border-radius: 20px;
+    padding: 12px 16px;
+    border-radius: 18px;
+
     text-align: center;
 }
 
 .measurement h2 {
     color: #a8b8ca;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin: 10px 0;
+
+    margin: 0;
+    flex-shrink: 0;
 }
 
 /* Breathing rate */
@@ -72,29 +119,36 @@ body {
     justify-content: center;
     align-items: baseline;
     gap: 8px;
-    margin: 30px 0;
+
+    margin: 0;
+    flex-shrink: 0;
 }
 
 #breathing-rate {
-    font-size: 64px;
+    font-size: clamp(36px, 6vh, 60px);
     font-weight: bold;
-    line-height: 1.2;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
 
 .unit {
     color: #a8b8ca;
-    font-size: 16px;
+    font-size: 14px;
 }
 
-/* Breathing visualisation */
+/* Breathing circle */
 
 .breathing-circle {
-    width: 150px;
-    height: 150px;
+    width: clamp(45px, 12vh, 140px);
+    height: clamp(45px, 12vh, 140px);
+
+    flex: 0 1 auto;
+    min-height: 35px;
+    min-width: 35px;
+
     border: none;
     border-radius: 50%;
-    margin: 25px auto;
+    margin: 0 auto;
 
     display: flex;
     justify-content: center;
@@ -106,42 +160,55 @@ body {
 .circle-centre {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
+
     border-radius: 50%;
     background: #62d9bd;
 }
 
 #measurement-message {
     color: #a8b8ca;
-    font-size: 15px;
-    margin-top: 20px;
+    font-size: 13px;
+    line-height: 1.4;
+
+    margin: 0;
+    flex-shrink: 0;
+    overflow-wrap: anywhere;
 }
 
-/* Signal quality and camera details */
+/* =========================================
+   Signal quality and camera details
+   ========================================= */
 
 .details {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 10px;
+
+    flex: 0 0 auto;
+    min-width: 0;
 }
 
 .detail-card {
     background: #1a2638;
     border-radius: 12px;
-    padding: 20px;
+    padding: 12px 14px;
     min-width: 0;
 }
 
 .detail-card h3 {
-    font-size: 13px;
+    font-size: 12px;
     color: #a8b8ca;
-    margin: 5px 0 15px;
+    margin: 0 0 7px;
 }
 
 .detail-card p {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
-    margin: 0 0 15px;
+    margin: 0 0 8px;
     overflow-wrap: anywhere;
 }
 
@@ -150,19 +217,24 @@ body {
 .camera-label {
     display: block;
     color: #a8b8ca;
-    font-size: 12px;
-    margin-bottom: 8px;
+    font-size: 11px;
+    margin-bottom: 5px;
 }
 
 #camera-select {
+    display: block;
     width: 100%;
-    padding: 10px;
+    min-width: 0;
+
+    height: 34px;
+    padding: 5px 9px;
+
     border: 1px solid #405169;
     border-radius: 8px;
 
     background: #253449;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
 
     cursor: pointer;
 }
@@ -177,24 +249,34 @@ body {
     outline-offset: 2px;
 }
 
-/* Start and Stop buttons */
+/* =========================================
+   Start and Stop controls
+
+   These always reserve their own space.
+   ========================================= */
 
 .controls {
     display: flex;
-    gap: 15px;
-    margin-top: 25px;
+    gap: 10px;
+    margin: 0;
+
+    flex: 0 0 auto;
 }
 
 button {
     flex: 1;
-    padding: 14px;
+    min-width: 0;
+    min-height: 40px;
+
+    padding: 10px 12px;
+
     border: none;
     border-radius: 10px;
 
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
-    cursor: pointer;
 
+    cursor: pointer;
     transition: background 0.2s ease;
 }
 
@@ -226,11 +308,16 @@ button:focus-visible {
     outline-offset: 3px;
 }
 
-/* Feedback messages */
+/* =========================================
+   Feedback
+   ========================================= */
 
 .feedback {
-    margin-top: 20px;
-    padding: 14px 18px;
+    flex: 0 0 auto;
+
+    margin: 0;
+    padding: 9px 12px;
+
     background: #1a2638;
     border-radius: 10px;
     text-align: center;
@@ -238,72 +325,50 @@ button:focus-visible {
 
 #validation-message {
     color: #a8b8ca;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.4;
+
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
-/* Footer */
+/* =========================================
+   Footer
+   ========================================= */
 
 footer {
+    flex: 0 0 auto;
+
     text-align: center;
-    margin-top: 30px;
+    margin: 0;
+
     color: #8291a5;
-    font-size: 12px;
+    font-size: 10px;
+    line-height: 1.3;
 }
 
 footer p {
-    margin: 8px 0;
+    margin: 2px 0;
 }
 
 .disclaimer {
-    font-size: 11px;
+    font-size: 10px;
     color: #74849a;
 }
 
-/* Smaller window support */
-
-@media (max-width: 600px) {
-    .app {
-        padding: 20px;
-    }
-
-    .header h1 {
-        font-size: 26px;
-    }
-
-    .details {
-        grid-template-columns: 1fr;
-    }
-
-    #breathing-rate {
-        font-size: 48px;
-    }
-
-    .measurement {
-        padding: 25px 15px;
-    }
-
-    .breathing-circle {
-        width: 125px;
-        height: 125px;
-    }
-
-    .waveform-panel {
-        width: 135px;
-        top: 12px;
-        right: 12px;
-    }
-}
-
-/* Full-window breathing ripples */
+/* =========================================
+   Full-window breathing ripples
+   ========================================= */
 
 .ripple-layer {
     position: fixed;
     inset: 0;
+
     overflow: hidden;
     pointer-events: none;
+
     z-index: 9999;
+
     opacity: 0;
     transition: opacity 0.5s ease;
 
@@ -318,6 +383,7 @@ footer p {
 
 .breathing-ripple {
     position: absolute;
+
     top: var(--ripple-y);
     left: var(--ripple-x);
 
@@ -327,15 +393,18 @@ footer p {
     border: 3px solid rgba(74, 192, 222, 0.25);
     border-radius: 50%;
 
-    box-shadow: 0 0 28px rgba(74, 192, 222, 0.10);
+    box-shadow:
+        0 0 28px rgba(74, 192, 222, 0.10);
 
-    animation: breathing-wave
+    animation:
+        breathing-wave
         var(--breath-duration)
         linear
         infinite;
 
     animation-delay: calc(
-        var(--breath-duration) * var(--ripple-index) / -3
+        var(--breath-duration)
+        * var(--ripple-index) / -3
     );
 }
 
@@ -345,7 +414,8 @@ footer p {
 
 @keyframes breathing-wave {
     0% {
-        transform: translate(-50%, -50%) scale(0.002);
+        transform:
+            translate(-50%, -50%) scale(0.002);
         opacity: 0;
     }
 
@@ -358,26 +428,24 @@ footer p {
     }
 
     100% {
-        transform: translate(-50%, -50%) scale(1);
+        transform:
+            translate(-50%, -50%) scale(1);
         opacity: 0;
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .ripple-layer {
-        display: none;
-    }
-}
-
-/* Small waveform display at the top right */
+/* =========================================
+   Breathing waveform
+   ========================================= */
 
 .waveform-panel {
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: 10px;
+    right: 10px;
 
-    width: 190px;
-    padding: 10px 12px;
+    width: clamp(125px, 22vw, 170px);
+
+    padding: 8px 10px;
 
     background: #132335;
     border: 1px solid #405169;
@@ -388,21 +456,23 @@ footer p {
 }
 
 .waveform-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: #a8b8ca;
-    margin-bottom: 6px;
+
+    margin-bottom: 5px;
 }
 
 .waveform-svg {
     display: block;
     width: 100%;
-    height: 48px;
+    height: 36px;
     overflow: hidden;
 }
 
 .waveform-path {
     fill: none;
+
     stroke: #63798b;
     stroke-width: 2.5;
     stroke-linecap: round;
@@ -411,33 +481,44 @@ footer p {
 
 .waveform-panel.active .waveform-path {
     stroke: #62d9bd;
-    filter: drop-shadow(0 0 3px rgba(98, 217, 189, 0.35));
+
+    filter: drop-shadow(
+        0 0 3px rgba(98, 217, 189, 0.35)
+    );
 }
 
-/* Floating positioning guidance popup */
+/* =========================================
+   Persistent positioning guidance
+   ========================================= */
 
 .guidance-popup {
     position: fixed;
+
     top: 38%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.95);
+
+    transform:
+        translate(-50%, -50%) scale(0.95);
 
     max-width: 360px;
     width: calc(100% - 48px);
 
-    padding: 20px 26px;
+    padding: 16px 20px;
     border-radius: 16px;
 
     background: rgba(30, 48, 65, 0.96);
-    border: 1px solid rgba(100, 210, 240, 0.45);
+
+    border:
+        1px solid rgba(100, 210, 240, 0.45);
 
     color: #e8f7fd;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     line-height: 1.5;
     text-align: center;
 
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.35);
 
     z-index: 10000;
     pointer-events: none;
@@ -454,34 +535,38 @@ footer p {
 .guidance-popup.visible {
     opacity: 1;
     visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
+
+    transform:
+        translate(-50%, -50%) scale(1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .guidance-popup {
-        transition: none;
-    }
-}
-
-/* Added: breathing measurement acquisition indicator */
+/* =========================================
+   Acquisition indicator
+   ========================================= */
 
 .acquisition-indicator {
     display: none;
+
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 
+    width: 100%;
     max-width: 490px;
-    margin: 16px auto 0;
-    padding: 12px 16px;
+
+    margin: 0 auto;
+    padding: 8px 12px;
 
     background: rgba(98, 217, 189, 0.08);
-    border: 1px solid rgba(98, 217, 189, 0.22);
+
+    border:
+        1px solid rgba(98, 217, 189, 0.22);
+
     border-radius: 12px;
 
     color: #c7e8df;
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.4;
     text-align: left;
 }
 
@@ -490,19 +575,23 @@ footer p {
 }
 
 .acquisition-spinner {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
 
-    border: 2px solid rgba(98, 217, 189, 0.25);
+    border:
+        2px solid rgba(98, 217, 189, 0.25);
+
     border-top-color: #62d9bd;
     border-radius: 50%;
 
-    animation: acquisition-spin 1s linear infinite;
+    animation:
+        acquisition-spin 1s linear infinite;
 }
 
 .acquisition-text {
     flex: 1;
+    min-width: 0;
 }
 
 @keyframes acquisition-spin {
@@ -511,9 +600,202 @@ footer p {
     }
 }
 
+/* =========================================
+   Compact windows
+   ========================================= */
+
+@media (max-height: 750px) {
+    .app {
+        padding: 9px 14px;
+        gap: 6px;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+
+    #session-status {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .measurement {
+        padding: 8px 12px;
+        gap: 5px;
+    }
+
+    .measurement h2 {
+        font-size: 11px;
+    }
+
+    #breathing-rate {
+        font-size: 40px;
+    }
+
+    .unit {
+        font-size: 12px;
+    }
+
+    .breathing-circle {
+        width: clamp(40px, 9vh, 75px);
+        height: clamp(40px, 9vh, 75px);
+    }
+
+    #measurement-message {
+        font-size: 12px;
+    }
+
+    .detail-card {
+        padding: 9px 12px;
+    }
+
+    .detail-card h3 {
+        margin-bottom: 4px;
+    }
+
+    .detail-card p {
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .camera-label {
+        font-size: 10px;
+        margin-bottom: 3px;
+    }
+
+    #camera-select {
+        height: 32px;
+    }
+
+    button {
+        min-height: 38px;
+        padding: 8px 10px;
+    }
+
+    .feedback {
+        padding: 7px 10px;
+    }
+
+    #validation-message {
+        font-size: 11px;
+    }
+
+    footer {
+        font-size: 9px;
+    }
+
+    .disclaimer {
+        font-size: 9px;
+    }
+
+    .waveform-panel {
+        width: 130px;
+        padding: 6px 8px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .waveform-svg {
+        height: 26px;
+    }
+
+    .acquisition-indicator {
+        padding: 6px 9px;
+        font-size: 11px;
+    }
+}
+
+/* =========================================
+   Narrow windows
+   ========================================= */
+
+@media (max-width: 600px) {
+    .app {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .detail-card {
+        padding: 9px;
+    }
+
+    .waveform-panel {
+        width: 120px;
+    }
+
+    .measurement h2 {
+        align-self: flex-start;
+        text-align: left;
+        max-width: calc(100% - 135px);
+    }
+}
+
+/* =========================================
+   Extremely small windows
+
+   Allow scrolling rather than hiding
+   essential controls.
+   ========================================= */
+
+@media (max-height: 480px) {
+    body {
+        overflow-y: auto;
+    }
+
+    .app {
+        min-height: 480px;
+        height: auto;
+        overflow: visible;
+    }
+
+    .measurement {
+        min-height: 150px;
+    }
+}
+
+@media (max-width: 430px) {
+    body {
+        overflow-y: auto;
+    }
+
+    .app {
+        min-height: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .details {
+        grid-template-columns: 1fr;
+    }
+
+    .measurement {
+        min-height: 180px;
+    }
+}
+
+/* =========================================
+   Reduced motion accessibility
+   ========================================= */
+
 @media (prefers-reduced-motion: reduce) {
+    .ripple-layer {
+        display: none;
+    }
+
+    .guidance-popup {
+        transition: none;
+    }
+
     .acquisition-spinner {
         animation: none;
         border-color: #62d9bd;
+    }
+
+    button {
+        transition: none;
     }
 }

@@ -189,30 +189,81 @@ test('Stale measurement remains visible but animations stop', async () => {
 });
 
 // REGRESSION 06
-test('Camera positioning guidance appears and disappears', async () => {
+// Updated to test persistent positioning guidance
+test('Positioning guidance persists until a stable reading or Stop', async () => {
+
+    const guidancePopup = window.locator('.guidance-popup');
+
+    // Start measurement
     await sendEvent('session-status', 'measuring');
 
+    // Simulate a positioning problem
     await sendEvent(
         'validation-status',
         'Move further away from the camera.'
     );
 
-    await expect(
-        window.locator('.guidance-popup')
-    ).toBeVisible();
+    // Guidance should appear
+    await expect(guidancePopup).toBeVisible();
 
-    await expect(
-        window.locator('.guidance-popup')
-    ).toContainText('Move further away');
+    await expect(guidancePopup).toContainText(
+        'Move further away'
+    );
 
+    // SDK sends a generic instruction
     await sendEvent(
         'validation-status',
         'Hold still and record.'
     );
 
+    // Guidance should remain visible while no stable reading exists
+    await expect(guidancePopup).toBeVisible();
+
+    // Wait longer than the old four-second timeout
+    await window.waitForTimeout(4500);
+
+    // The popup must not disappear automatically
+    await expect(guidancePopup).toBeVisible();
+
+    // Simulate an actual stable breathing measurement
+    await sendEvent('breathing-rate', 18.5);
+    await sendEvent('signal-quality', 'Stable');
+
     await expect(
-        window.locator('.guidance-popup')
-    ).toBeHidden();
+        window.locator('#breathing-rate')
+    ).toHaveText('18.50');
+
+    // Positioning guidance should now disappear
+    await expect(guidancePopup).toBeHidden();
+
+    // Simulate losing the stable signal
+    await sendEvent(
+        'signal-quality',
+        'Unstable'
+    );
+
+    await sendEvent(
+        'validation-status',
+        'Keep your face visible.'
+    );
+
+    // Guidance should return
+    await expect(guidancePopup).toBeVisible();
+
+    await expect(guidancePopup).toContainText(
+        'Keep your face visible'
+    );
+
+    // Stop measurement
+    await sendEvent('session-status', 'stopping');
+
+    // The popup should disappear immediately
+    await expect(guidancePopup).toBeHidden();
+
+    await sendEvent('session-status', 'idle');
+
+    // It must remain hidden after stopping
+    await expect(guidancePopup).toBeHidden();
 });
 
 // REGRESSION 07
